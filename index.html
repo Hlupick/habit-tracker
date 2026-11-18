@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Привычки">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Трекер привычек: серии, статистика и цели. Работает офлайн.">
+<title>Трекер привычек</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <div class="brand-text">
+        <h1>Трекер привычек</h1>
+        <p class="sub" id="topSub"></p>
+      </div>
+    </div>
+
+    <nav class="tabs" id="tabs" aria-label="Разделы">
+      <button class="tab active" data-act="view" data-view="week">Неделя</button>
+      <button class="tab" data-act="view" data-view="today">Сегодня</button>
+      <button class="tab" data-act="view" data-view="month">Месяц</button>
+      <button class="tab" data-act="view" data-view="stats">Аналитика</button>
+    </nav>
+
+    <div class="actions">
+      <button class="level-chip" id="levelChip" data-act="view" data-view="stats" title="Опыт и достижения"></button>
+      <button class="icon-btn" data-act="theme" id="themeBtn" aria-label="Сменить тему"></button>
+      <button class="icon-btn" data-act="settings" aria-label="Настройки" title="Настройки">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.2.61.77 1 1.42 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="view active" id="view-week"></section>
+    <section class="view" id="view-today"></section>
+    <section class="view" id="view-month"></section>
+    <section class="view" id="view-stats"></section>
+  </main>
+</div>
+
+<nav class="mobile-nav" id="mobileNav" aria-label="Разделы">
+  <button class="mnav active" data-act="view" data-view="week"><span>▦</span>Неделя</button>
+  <button class="mnav" data-act="view" data-view="today"><span>✓</span>Сегодня</button>
+  <button class="mnav" data-act="view" data-view="month"><span>▤</span>Месяц</button>
+  <button class="mnav" data-act="view" data-view="stats"><span>◔</span>Аналитика</button>
+</nav>
+
+<!-- редактор привычки -->
+<dialog id="editor" class="dialog">
+  <form id="editorForm" novalidate>
+    <div class="dialog-head">
+      <h2 id="editorTitle">Новая привычка</h2>
+      <button type="button" class="icon-btn ghost" data-act="closeDialog" data-dialog="editor" aria-label="Закрыть">✕</button>
+    </div>
+    <div class="dialog-body">
+      <div class="field">
+        <label for="eName">Название</label>
+        <div class="name-row">
+          <input type="text" id="eEmoji" class="emoji-input" maxlength="4" aria-label="Иконка">
+          <input type="text" id="eName" maxlength="60" placeholder="Например, пить 2 литра воды" autocomplete="off">
+        </div>
+        <div class="emoji-list" id="eEmojiList"></div>
+      </div>
+
+      <div class="field">
+        <label>Цвет</label>
+        <div class="swatches" id="eColors"></div>
+      </div>
+
+      <div class="field">
+        <label for="eCategory">Категория</label>
+        <input type="text" id="eCategory" list="categoryList" maxlength="20" placeholder="Здоровье, работа…" autocomplete="off">
+        <datalist id="categoryList"></datalist>
+      </div>
+
+      <div class="field">
+        <label>Тип отметки</label>
+        <div class="seg" id="eTypeSeg">
+          <button type="button" data-type="check">Галочка</button>
+          <button type="button" data-type="count">Число</button>
+        </div>
+        <div class="count-pane" id="eCountPane">
+          <div class="count-grid">
+            <label class="mini-label" for="eTarget">Цель</label>
+            <label class="mini-label" for="eUnit">Единица</label>
+            <label class="mini-label" for="eStep">Шаг</label>
+            <input type="number" id="eTarget" min="1" step="1" value="1">
+            <input type="text" id="eUnit" maxlength="10" placeholder="мл">
+            <input type="number" id="eStep" min="1" step="1" value="1">
+          </div>
+          <p class="hint">Например: цель 2000, единица «мл», шаг 250.</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Расписание</label>
+        <div class="seg" id="eModeSeg">
+          <button type="button" data-mode="days">По дням недели</button>
+          <button type="button" data-mode="week">N раз в неделю</button>
+        </div>
+        <div id="eDaysPane" class="pane">
+          <div class="day-toggles" id="eDays"></div>
+        </div>
+        <div id="eWeekPane" class="pane week-pane">
+          <button type="button" class="step" data-act="pw" data-step="-1">−</button>
+          <span id="ePerWeek">3</span>
+          <button type="button" class="step" data-act="pw" data-step="1">+</button>
+          <span class="hint">раз в неделю — отмечайте в любой день</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="eReminder">Напоминание</label>
+        <div class="row">
+          <input type="time" id="eReminder">
+          <button type="button" class="btn" data-act="clearReminder">Без напоминания</button>
+        </div>
+      </div>
+    </div>
+    <div class="dialog-foot">
+      <button type="button" class="btn danger" id="eDelete">Удалить</button>
+      <button type="button" class="btn" id="eArchive">В архив</button>
+      <div class="spacer"></div>
+      <button type="button" class="btn" data-act="closeDialog" data-dialog="editor">Отмена</button>
+      <button type="submit" class="btn primary">Сохранить</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- настройки -->
+<dialog id="settings" class="dialog">
+  <div class="dialog-head">
+    <h2>Настройки</h2>
+    <button type="button" class="icon-btn ghost" data-act="closeDialog" data-dialog="settings" aria-label="Закрыть">✕</button>
+  </div>
+  <div class="dialog-body" id="settingsBody"></div>
+</dialog>
+
+<!-- шаблоны -->
+<dialog id="templates" class="dialog">
+  <div class="dialog-head">
+    <h2>Готовые наборы</h2>
+    <button type="button" class="icon-btn ghost" data-act="closeDialog" data-dialog="templates" aria-label="Закрыть">✕</button>
+  </div>
+  <div class="dialog-body" id="templatesBody"></div>
+</dialog>
+
+<div id="popRoot"></div>
+<div id="toastRoot"></div>
+
+<script src="js/util.js"></script>
+<script src="js/store.js"></script>
+<script src="js/logic.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
